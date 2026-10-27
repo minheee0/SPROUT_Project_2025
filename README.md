@@ -1,102 +1,207 @@
+# 🌱 SPROUT — Backend API
 
-# 🌱 SPROUT
-<img width="1090" height="613" alt="Image" src="https://github.com/user-attachments/assets/2e6e697f-ca2f-491a-b826-13af98c1adee" />
-> 프로젝트 기간: 2025.3.1 ~ 2025.11.11 ✅
-<br/>
+<img width="1090" height="613" alt="Sprout 대표 이미지" src="https://github.com/user-attachments/assets/2e6e697f-ca2f-491a-b826-13af98c1adee" />
+
+> **IoT 기반 스마트 식물 관리 앱 Sprout의 백엔드 서버**
+>
+> - **기간**: 2025.03.01 ~ 2025.11.11
+> - **팀 구성**: 6명 (Frontend 2 · Backend 2 · IoT/Infra 2)
+> - **담당**: Backend — 인증/인가, 맞춤 식물 추천, 회원 도메인 DB 설계
+> - **성과**: 교내 소프트웨어 경진대회 장려상
+
+> 📌 팀 프로젝트 중 **제가 담당한 백엔드 기능**을 중심으로 정리한 포트폴리오용 저장소입니다.
+> 전체 프로젝트 소개는 [팀 원본 저장소](https://github.com/<팀-org>/<repo>)에서 볼 수 있습니다.
+
 <br/>
 
-# 0. 시작하기 ✅
+## 📌 목차
+
+1. [프로젝트 소개](#-프로젝트-소개)
+2. [담당 역할 및 구현 내용](#-담당-역할-및-구현-내용)
+3. [기술 스택](#-기술-스택)
+4. [시스템 구조 & ERD](#-시스템-구조--erd)
+5. [API 명세](#-api-명세)
+6. [트러블슈팅](#-트러블슈팅)
+7. [팀 구성](#-팀-구성)
+8. [실행 방법](#-실행-방법)
+9. [회고](#-회고)
+
+<br/>
+
+## 🌿 프로젝트 소개
+
+**Sprout**는 IoT 센서를 활용해 실내 식물을 키우는 사용자가 **환경을 실시간으로 모니터링하고 직접 제어**할 수 있도록 돕는 스마트 식물 관리 앱입니다.
+
+| 기능 | 설명 |
+| :--- | :--- |
+| 🔐 회원가입 / 로그인 | 이메일·비밀번호 기반 인증, JWT 토큰으로 세션 관리 |
+| 🌱 맞춤 식물 추천 | 3가지 설문 응답을 바탕으로 사용자에게 맞는 식물 3종 추천 |
+| 📒 식물 등록 / 성장 일지 | 반려식물 등록, 캘린더 메모 및 날짜별 스티커 |
+| 📡 실시간 환경 모니터링 | 조도·온도·습도·토양 수분 실시간 확인, LED 조명 제어 |
+
+> 이 중 **🔐 회원가입/로그인**과 **🌱 맞춤 식물 추천**의 백엔드를 제가 담당했습니다.
+
+<br/>
+
+## 👩‍💻 담당 역할 및 구현 내용
+
+### 1. JWT 기반 회원 인증/인가
+
+- 이메일·비밀번호 기반 **회원가입 / 로그인 API** 구현
+- **JWT**를 이용한 무상태(Stateless) 인증 — 서버 세션 없이 토큰으로 사용자 식별
+- **Spring Security** 설정으로 인증이 필요한 API와 공개 API 구분
+- 비밀번호는 `BCryptPasswordEncoder`로 해시하여 저장
+
+<!-- TODO: 실제 구현한 것만 남기세요
+- [ ] Refresh Token 재발급 로직을 구현했다면 추가
+- [ ] 토큰 만료/위조 시 예외 응답 처리 방식
+-->
+
+```
+[Client] ── 로그인 요청 ──▶ [AuthController] ──▶ [AuthService] ── 검증 ──▶ [MySQL]
+   ▲                                                   │
+   └──────────── Access Token 발급 ◀───────────────────┘
+
+[Client] ── API 요청 + Authorization: Bearer {token} ──▶ [JwtFilter] ── 검증 통과 ──▶ [Controller]
+```
+
+### 2. 사용자 맞춤 식물 추천
+
+- 사용자의 **3가지 설문 응답**을 조건으로 식물 데이터를 필터링해 **적합한 식물 3종**을 추천
+- 농촌진흥청 **농사로 Open API**를 연동해 공공 식물 데이터를 받아와 추천에 활용
+
+| 설문 항목 | 매칭 기준 (농사로 데이터) |
+| :--- | :--- |
+| <!-- TODO: 예) 집의 햇빛 정도 --> | <!-- TODO: 예) 광요구도 --> |
+| <!-- TODO --> | <!-- TODO: 예) 관리 난이도 --> |
+| <!-- TODO --> | <!-- TODO --> |
+
+<!-- TODO: 추천 로직을 한두 줄로 구체화하면 좋습니다.
+예) "조건을 모두 만족하는 식물을 우선 추천하고, 3종이 안 되면 일치 조건 수가 많은 순으로 채움"
+-->
+
+### 3. 회원 도메인 DB 설계
+
+- **MySQL** 기반 회원 테이블 및 설문/추천 관련 테이블 설계
+- **Spring Data JPA**로 엔티티 매핑 및 Repository 구현
+
+<br/>
+
+## 🛠 기술 스택
+
+| 분류 | 기술 |
+| :--- | :--- |
+| **Language** | ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white) |
+| **Framework** | ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white) ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white) |
+| **Auth** | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white) |
+| **Database** | ![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white) ![JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white) |
+| **Build** | ![Gradle](https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white) |
+| **Infra** | ![Amazon EC2](https://img.shields.io/badge/Amazon_EC2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white) ![Amazon RDS](https://img.shields.io/badge/Amazon_RDS-527FFF?style=for-the-badge&logo=amazonrds&logoColor=white) |
+| **External API** | 농사로 Open API (농촌진흥청) |
+
+<details>
+<summary>전체 서비스 기술 스택 (팀)</summary>
+
+| 파트 | 기술 |
+| :--- | :--- |
+| Frontend | React Native (Expo), JavaScript |
+| Backend | Java, Spring Boot, MySQL |
+| Infra | AWS EC2, RDS |
+| IoT | ESP32, Arduino (조도·온습도·토양수분 센서) |
+
+</details>
+
+<br/>
+
+## 🏗 시스템 구조 & ERD
+
+### 시스템 아키텍처
+
+<!-- TODO: 아키텍처 다이어그램 이미지 첨부 -->
+
+```
+[React Native App] ⇄ [Spring Boot API (EC2)] ⇄ [MySQL (RDS)]
+                              │
+                              └──▶ [농사로 Open API]
+[ESP32 센서] ──▶ [Spring Boot API]
+```
+
+### ERD (담당 도메인)
+
+<!-- TODO: 회원/설문/추천 테이블 ERD 이미지 첨부 (dbdiagram.io, ERDCloud 등) -->
+
+<br/>
+
+## 📄 API 명세 (담당 파트)
+
+| Method | URI | 설명 | 인증 |
+| :---: | :--- | :--- | :---: |
+| `POST` | `/api/auth/signup` | 회원가입 | ❌ |
+| `POST` | `/api/auth/login` | 로그인 (JWT 발급) | ❌ |
+| `POST` | `/api/recommend` | 설문 응답 기반 식물 3종 추천 | ✅ |
+
+<!-- TODO: 실제 엔드포인트로 교체 -->
+
+<br/>
+
+## 🔥 트러블슈팅
+
+<!-- 면접에서 가장 많이 물어보는 섹션입니다. 실제 겪은 문제 1~2개만 써도 충분합니다. -->
+
+### 1. <!-- 예) 농사로 API 응답이 XML이라 파싱 문제 -->
+
+- **문제**:
+- **원인**:
+- **해결**:
+- **배운 점**:
+
+### 2. <!-- 예) 프론트 연동 시 CORS 에러 / 토큰 만료 처리 -->
+
+- **문제**:
+- **원인**:
+- **해결**:
+
+<br/>
+
+## 👥 팀 구성
+
+| 이름 | 파트 | 담당 |
+| :---: | :---: | :--- |
+| 민도현 ([@mindo0118](https://github.com/mindo0118)) | ![FrontEnd](https://img.shields.io/badge/FrontEnd-3f97fb) ![Leader](https://img.shields.io/badge/Team_Leader-yellow) | 식물 등록/성장 일지 UI, IoT 디바이스 제어 UI |
+| 정현오 ([@hyeon-oo](https://github.com/hyeon-oo)) | ![FrontEnd](https://img.shields.io/badge/FrontEnd-3f97fb) | 메인/시작/검색 UI, 알림 및 IoT 페이지 UI |
+| **박민희 ([@minheee0](https://github.com/minheee0))** | ![BackEnd](https://img.shields.io/badge/BackEnd-ff6f61) | **회원 인증(JWT), 맞춤 식물 추천, 회원 DB 설계** |
+| 최진솔 ([@choelsol](https://github.com/choelsol)) | ![BackEnd](https://img.shields.io/badge/BackEnd-ff6f61) | 식물 등록/성장 일지 기능, 관련 DB 설계 |
+| 김다연 ([@double2-22](https://github.com/double2-22)) | ![IoT](https://img.shields.io/badge/IoT-00c853) | AWS 인프라 구축, 센서 연결 및 디바이스 외형 제작 |
+| 김민정 ([@gnujnim475](https://github.com/gnujnim475)) | ![IoT](https://img.shields.io/badge/IoT-00c853) | AWS 인프라 구축, IoT 센서 장착 및 데이터 수집 |
+
+<br/>
+
+## 🚀 실행 방법
+
 ```bash
-$ yarn start
+# 1. 클론
+git clone https://github.com/minheee0/<repo-name>.git
+cd <repo-name>
+
+# 2. 환경 변수 설정 (src/main/resources/application.yml 또는 .env)
+#    DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET, NONGSARO_API_KEY
+
+# 3. 빌드 및 실행
+./gradlew clean build
+./gradlew bootRun
 ```
 
 <br/>
 
-# 01. 프로젝트 소개
+## 💭 회고
 
-- Sprout는 IoT 기반 센서를 활용하여 실내 식물을 키우는 사용자가 **환경을 실시간 모니터링하고 직접 제어**할 수 있도록 돕는 스마트 식물 관리 앱입니다.
-- 조도, 온·습도, 토양 수분 등 식물 생육에 필요한 환경 정보를 스마트폰 앱을 통해 실시간 확인할 수 있습니다.
-- 앱에서 직접 LED 조명 제어와 같은 환경 조절도 가능합니다.
-- 사용자가 자신이 키우는 식물을 앱에 등록하고, 식물의 상태와 관리 기록을 손쉽게 관리할 수 있습니다.
-
-<br/>
-
-## 팀원 구성
-
-| **민도현** | **정현오** | **박민희** |  **최진솔**  |
-| :------------: | :------------: | :------------: | :------------: |
-| <img src="https://github.com/user-attachments/assets/7d5b65b3-3751-4c6a-b4bc-69b742cc3053" width=180> | <img src="https://github.com/user-attachments/assets/f5e6a094-960f-4bfc-9c41-1bfe87e68372" width=180> | <img src="https://github.com/user-attachments/assets/9f18cc61-6401-423b-aaed-29f02b2622a2" width=180> | <img src="https://github.com/user-attachments/assets/80a22590-80ba-47a0-9098-089839a38ebd" width=180> | 
-| **github**: [mindo0118](https://github.com/mindo0118)| **github**: [hyeon-oo](https://github.com/hyeon-oo) |  **github**: [minheee0](https://github.com/minheee0) | **github**: [choelsol](https://github.com/choelsol) |
-| ![FrontEnd](https://img.shields.io/badge/FrontEnd-3f97fb)</br> ![Team%20Leader](https://img.shields.io/badge/-Team%20leader-yellow) </br> | ![FrontEnd](https://img.shields.io/badge/FrontEnd-3f97fb) |  ![BackEnd](https://img.shields.io/badge/BackEnd-ff6f61)</br>| ![BackEnd](https://img.shields.io/badge/BackEnd-ff6f61) |
-
-| **김다연**  |   **김민정**  |  
-| :------------: | :------------: |
-| <img src="https://github.com/user-attachments/assets/47ec901d-ee5e-4259-8d4b-064f10562f17" width=170> | <img src="https://github.com/user-attachments/assets/a2effb4f-3521-48f4-8d66-512d270aeead" width=160> |  
-| **github**: [double2-22](https://github.com/double2-22) | **github**: [gnujnim475](https://github.com/gnujnim475) |  
-| ![IoT](https://img.shields.io/badge/IoT-00c853) | ![IoT](https://img.shields.io/badge/IoT-00c853) |  
+<!-- TODO: 3~5줄 정도. 예시 -->
+- 처음으로 인증 기능을 직접 구현하며 **세션 방식과 토큰 방식의 차이**를 이해하게 되었습니다.
+- 외부 공공 API를 서비스 데이터로 가공하면서 <!-- 느낀 점 -->
+- 아쉬운 점 / 개선하고 싶은 점: <!-- 예) Refresh Token 도입, 테스트 코드 작성 -->
 
 <br/>
-<br/>
 
-# ✅02. 프로젝트 주요 기능
-1. **회원가입 및 로그인**  
-   - 이메일/비밀번호 기반 인증  
-   - JWT 토큰으로 세션 관리  
+## 📚 참고 자료
 
-2. **초기 사용자 맞춤 식물 추천**  
-   - 3가지 질문에 따라 적합한 3종의 식물 추천
-   - 추천 식물 3종 표시
-   
-3. **식물 등록 및 성장 일지**
-   - 반려식물 정보를 등록하고 관리하는 기능
-   - 캘린더에서 메모 작성 및 날짜별 식물 스티커 표시
-
-4. **실시간 환경 모니터링 기능**
-   - 등록된 식물은 IoT 기기와 연동되어 조도, 온도, 습도, 토양 수분을 실시간 모니터링
-
-<br/>
-<br/>
-
-# 03. 프로젝트 기술 스택
-
-## 🛠 Tech Stack
-
-### 📱 Frontend & ⚙️ Backend
-| 기술 | Frontend | Backend | 
-| :--- | :--- |:--- | 
-| **Language** | ![JavaScript](https://img.shields.io/badge/javascript-%23F7DF1E.svg?style=for-the-badge&logo=javascript&logoColor=black) | ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white) |
-| **Framework** | ![React Native](https://img.shields.io/badge/react_native-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) |  ![Spring Boot](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white) |
-| **Tool** | ![Expo](https://img.shields.io/badge/expo-000020?style=for-the-badge&logo=expo&logoColor=white) ![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) |  ![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=for-the-badge&logo=Gradle&logoColor=white) |
-
-### 🗄️ Database & Infrastructure
-| 분류 | 배지 |
-| :--- | :--- |
-| **Database** | ![MySQL](https://img.shields.io/badge/mysql-%23005C84.svg?style=for-the-badge&logo=mysql&logoColor=white) |
-| **Cloud** | ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white) ![Amazon EC2](https://img.shields.io/badge/Amazon_EC2-FF9900?style=for-the-badge&logo=amazon-ec2&logoColor=white) ![Amazon RDS](https://img.shields.io/badge/Amazon_RDS-527FFF?style=for-the-badge&logo=amazon-rds&logoColor=white) |
-
-### 🔌 IoT (Hardware)
-| 장치 | 배지 |
-| :--- | :--- |
-| **Controller** | ![Arduino](https://img.shields.io/badge/-Arduino-00979D?style=for-the-badge&logo=Arduino&logoColor=white) ![ESP32](https://img.shields.io/badge/ESP32-E7352C?style=for-the-badge&logo=espressif&logoColor=white) |
-
-# 04. 프로젝트 구조
-
-
-<br/>
-<br/>
-
-# 05. ✅ 역할 분담
-| 팀 | 팀원 | 담당 기능 |
-|----|------|-----------|
-| ![FrontEnd](https://img.shields.io/badge/FrontEnd-3f97fb) | 민도현 | 식물 등록/성장 일지 페이지 UI, IoT 디바이스 제어 UI |
-| ![FrontEnd](https://img.shields.io/badge/FrontEnd-3f97fb) | 정현오 | 메인/시작/검색 페이지 UI, 알림 페이지 및 IoT 페이지 UI |
-| ![BackEnd](https://img.shields.io/badge/BackEnd-ff6f61) | 박민희 | 회원가입/로그인 등 인증 기능, 맞춤 식물 추천 기능, 회원 DB 설계 |
-| ![BackEnd](https://img.shields.io/badge/BackEnd-ff6f61) | 최진솔 | 식물 등록/성장 일지 기능, 관련 DB 설계 |
-| ![IoT](https://img.shields.io/badge/IoT-00c853) | 김다연 | AWS 인프라 구축 및 연동, 센서 연결 및 디바이스 외형 제작 |
-| ![IoT](https://img.shields.io/badge/IoT-00c853) | 김민정 | AWS 인프라 구축 및 연동, IoT 센서 장착 및 데이터 수집 |
-
-<br/>
-<br/>
-
-# 06. 참고 자료
-- [농사로 API 문서](https://www.nongsaro.go.kr) - 식물 정보 및 추천 기능 활용
+- [농사로 Open API](https://www.nongsaro.go.kr) — 식물 정보 및 추천 기능 데이터
