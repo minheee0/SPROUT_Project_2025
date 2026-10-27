@@ -8,6 +8,7 @@ import com.example.demo.model.User;
 import com.example.demo.repository.PlantRepository;
 import com.example.demo.repository.RecommendedPlantRepository;
 import com.example.demo.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,13 +45,16 @@ public class PlantService {
     private final UserRepository userRepository;
     private final RecommendedPlantRepository recommendedPlantRepository;
     private final ObjectMapper objectMapper; // 💡 추가
+    private final String plantApiKey; // 농사로 API 키 (환경 변수 PLANT_API_KEY → plant.api.key)
 
     public PlantService(PlantRepository plantRepository, RestTemplate restTemplate, UserRepository userRepository,
-                        RecommendedPlantRepository recommendedPlantRepository) {
+                        RecommendedPlantRepository recommendedPlantRepository,
+                        @Value("${plant.api.key}") String plantApiKey) {
         this.plantRepository = plantRepository;
         this.restTemplate = restTemplate;
         this.userRepository = userRepository;
         this.recommendedPlantRepository = recommendedPlantRepository;
+        this.plantApiKey = plantApiKey;
         this.objectMapper = new ObjectMapper(); // 💡 초기화
     }
 
@@ -208,7 +212,7 @@ public class PlantService {
         String water = dto.getWaterCycleSel();
 
         String apiUrl = "http://api.nongsaro.go.kr/service/garden/gardenList"
-                + "?apiKey=" + "20250228AE7XDRGIMGFOSM9SITT2OQ"
+                + "?apiKey=" + plantApiKey
                 + "&lightChkVal=" + light
                 + "&grwhstleChkVal=" + growthStyle
                 + "&waterCycleSel=" + water;
