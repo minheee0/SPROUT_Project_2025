@@ -1,0 +1,23 @@
+# IDE 관련
+.idea/
+.settings/
+*.iml
+
+# 빌드 및 캐시
+.gradle/
+build/
+bin/
+out/
+
+# 로그 파일
+logs/
+*.log
+
+# OS 관련
+.DS_Store
+Thumbs.db
+
+.vscode/
+
+node_modeules/
+.env
