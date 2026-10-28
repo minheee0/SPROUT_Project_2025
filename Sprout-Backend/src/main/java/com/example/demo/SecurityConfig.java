@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -66,7 +67,6 @@ public class SecurityConfig {
                                 "/auth/find-password",
                                 "/api/**",                  // ESP32가 사용할 /api/ 경로들 허용
                                 "/ws/**",                   // 웹소켓 연결 경로 허용
-                                "/plants/recommendations",  // 식물 추천 경로 임시 허용
                                 "/error",                   // 비밀번호 찾기
                                 "/favicon.ico" ,            // 파비콘
                                 "/images/**"                // 이미지 경로 허용
@@ -75,6 +75,14 @@ public class SecurityConfig {
                         // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
+                // 인증 실패(토큰 없음·만료·위조) 시 403 대신 401 + JSON 메시지로 응답
+                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+                    Object jwtError = request.getAttribute(JwtAuthenticationFilter.JWT_ERROR_ATTRIBUTE);
+                    String message = jwtError != null ? jwtError.toString() : "로그인이 필요합니다.";
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"message\":\"" + message + "\"}");
+                }))
                 .formLogin(login -> login.disable())
                 .logout(logout -> logout.logoutUrl("/auth/logout")
                         .invalidateHttpSession(true)
