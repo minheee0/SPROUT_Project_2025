@@ -1,6 +1,6 @@
 # 🌱 SPROUT — Backend API
 
-<img width="1090" height="613" alt="Sprout 대표 이미지" src="https://github.com/user-attachments/assets/2e6e697f-ca2f-491a-b826-13af98c1adee" />
+<img width="1090" height="613" alt="Sprout 대표 이미지" src="images/sprout-main.png" />
 
 > **IoT 기반 스마트 식물 관리 앱 Sprout의 백엔드 서버**
 >
